@@ -53,7 +53,8 @@ type Event struct {
 func (c *CampusOnline) GetScheduleForRoom(roomID int) (*Room, error) {
 	query := baseURL + fmt.Sprintf(roomDN, c.token, roomID, time.Now().Format("20060102"), time.Now().Add(time.Hour*24*7*30*5).Format("20060102"))
 	var httpRes []byte
-	if cached, found := c.cache.Get(query); found {
+	cacheKey := fmt.Sprintf("%s%d", "roomschedule", roomID)
+	if cached, found := c.cache.Get(cacheKey); found {
 		httpRes = cached.([]byte)
 	} else {
 		res, err := http.Get(query)
@@ -64,7 +65,7 @@ func (c *CampusOnline) GetScheduleForRoom(roomID int) (*Room, error) {
 		if err != nil {
 			return nil, err
 		}
-		c.cache.SetWithTTL(query, resBody, 1, time.Minute)
+		c.cache.SetWithTTL(cacheKey, resBody, 1, time.Minute)
 		httpRes = resBody
 	}
 	var res RDM
