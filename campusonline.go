@@ -45,12 +45,10 @@ type Room struct {
 }
 
 type Course struct {
-	Title       string    `json:"title"`
-	CourseID    int       `json:"course_id"`
-	ContactName string    `json:"contact_name"`
-	ContactMail string    `json:"contact_mail"`
-	Events      []Event   `json:"events"`
-	Contacts    []Contact `json:"contacts"`
+	Title    string          `json:"title"`
+	CourseID int             `json:"course_id"`
+	Events   []Event         `json:"events"`
+	Contacts []ContactPerson `json:"contacts"`
 }
 
 type Event struct {
@@ -58,6 +56,7 @@ type Event struct {
 	RoomID int       `json:"room_id"`
 	Start  time.Time `json:"start"`
 	End    time.Time `json:"end"`
+	RoomName string          `json:"room_name"`
 }
 
 func (c *CampusOnline) GetScheduleForRoom(roomID int, semester string) (*Room, error) {
@@ -153,7 +152,7 @@ func groupEventsByName(events []CalendarEvent) map[string][]CalendarEvent {
 	return res
 }
 
-func (c *CampusOnline) GetCourseIdAndContacts(courseName string, semester string) (courseID int, contacts []Contact, err error) {
+func (c *CampusOnline) GetCourseIdAndContacts(courseName string, semester string) (courseID int, contacts []ContactPerson, err error) {
 	//Get courseID through course search:
 	re, err := regexp.Compile("(\\(.*\\))|(\\[.*])") // Einführung in die Informatik 1 [IN0001] -> Einführung in die Informatik 1
 	if err != nil {
@@ -194,7 +193,7 @@ func (c *CampusOnline) GetCourseIdAndContacts(courseName string, semester string
 			}
 
 			//Get course contacts via courseID
-			var c []Contact
+			var c []ContactPerson
 			for _, person := range course.Course.Contacts.Person {
 				r := ""
 				for _, role := range person.Role {
@@ -203,7 +202,7 @@ func (c *CampusOnline) GetCourseIdAndContacts(courseName string, semester string
 					}
 					r += role.Text
 				}
-				c = append(c, Contact{FirstName: person.Name.Given, LastName: person.Name.Family, Email: person.ContactData.Email, Role: r})
+				c = append(c, ContactPerson{FirstName: person.Name.Given, LastName: person.Name.Family, Email: person.ContactData.Email, Role: r})
 			}
 			return courseID, c, nil
 		}
@@ -229,7 +228,7 @@ func (c *CampusOnline) exportCourseByID(id int) (CDM, error) {
 	return result, nil
 }
 
-type Contact struct {
+type ContactPerson struct {
 	FirstName string
 	LastName  string
 	Email     string

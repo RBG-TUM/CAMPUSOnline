@@ -1,6 +1,9 @@
 package campusonline
 
-import "encoding/xml"
+import (
+	"encoding/xml"
+	"strings"
+)
 
 // RDM is a struct that can unmarshal tum online rdm replies
 type RDM struct {
@@ -269,3 +272,59 @@ type CDM struct {
 		} `xml:"infoBlock"`
 	} `xml:"course"`
 }
+
+type ICalendar struct {
+	XMLName        xml.Name `xml:"iCalendar"`
+	Text           string   `xml:",chardata"`
+	XCal           string   `xml:"xCal,attr"`
+	Xsi            string   `xml:"xsi,attr"`
+	SchemaLocation string   `xml:"schemaLocation,attr"`
+	Vcalendar      struct {
+		Text     string `xml:",chardata"`
+		Calscale string `xml:"calscale,attr"`
+		Method   string `xml:"method,attr"`
+		Version  string `xml:"version,attr"`
+		Prodid   string `xml:"prodid,attr"`
+		Events   Events `xml:"vevent"`
+	} `xml:"vcalendar"`
+}
+
+type VEvent struct {
+	Text        string `xml:",chardata"`
+	Uid         string `xml:"uid"`
+	Dtstamp     string `xml:"dtstamp"`
+	Dtstart     string `xml:"dtstart"`
+	Dtend       string `xml:"dtend"`
+	Duration    string `xml:"duration"`
+	Summary     string `xml:"summary"`
+	Description struct {
+		Text   string `xml:",chardata"`
+		Altrep string `xml:"altrep,attr"`
+	} `xml:"description"`
+	Location struct {
+		Text   string `xml:",chardata"`
+		Altrep string `xml:"altrep,attr"`
+	} `xml:"location"`
+	Status    string `xml:"status"`
+	Organizer struct {
+		Text string `xml:",chardata"`
+		Cn   string `xml:"cn,attr"`
+	} `xml:"organizer"`
+	Attendee []struct {
+		Text string `xml:",chardata"`
+		Cn   string `xml:"cn,attr"`
+	} `xml:"attendee"`
+	Categories struct {
+		Text string `xml:",chardata"`
+		Item string `xml:"item"`
+	} `xml:"categories"`
+	Comment string `xml:"comment"`
+}
+
+type Events []VEvent
+
+func (evt Events) Len() int { return len(evt) }
+
+func (v Events) Swap(i, j int) { v[i], v[j] = v[j], v[i] }
+
+func (v Events) Less(i, j int) bool { return strings.Compare(v[i].Dtstart, v[j].Dtstart) < 0 }
