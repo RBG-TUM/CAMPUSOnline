@@ -18,6 +18,10 @@ func main() {
 	ical.Sort()
 	fmt.Println(len(roomstuff.Vcalendar.Events))
 	courses := ical.GroupByCourse()
+	courses, err := co.LoadCourseContacts(courses)
+	if err != nil {
+		println(err)
+	}
 	println(len(courses))
 	for _, course := range courses {
 		println(course.Title, ":", course.CourseID)

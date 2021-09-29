@@ -41,7 +41,10 @@ func (c *ICalendar) Sort() {
 func (c *ICalendar) Filter() {
 	var newEvents []VEvent
 	for _, event := range c.Vcalendar.Events {
-		if event.Categories.Item == "Vorlesung" && event.Status == "fix" && inRoomList(event.Location.Text) {
+		if event.Categories.Item == "Vorlesung" &&
+			(event.Status == "fix" || event.Status == "geplant" )&&
+			inRoomList(event.Location.Text) &&
+			!strings.Contains(strings.ToLower(event.Comment), "videoübertragung aus") {
 			newEvents = append(newEvents, event)
 		}
 	}
@@ -95,18 +98,20 @@ func (c *ICalendar) GroupByCourse() []Course {
 				Title:    event.Summary,
 				CourseID: cID,
 				Events: []Event{{
-					Start: start,
-					End:   end,
+					Start:    start,
+					End:      end,
 					RoomName: event.Location.Text,
+					Comment:  event.Comment,
 				}},
 				Contacts: nil,
 			}
 		} else {
 			foundCourse.Events = append(foundCourse.Events, Event{
-				Title:  "",
-				Start:  start,
-				End:    end,
+				Title:    "",
+				Start:    start,
+				End:      end,
 				RoomName: event.Location.Text,
+				Comment:  event.Comment,
 			})
 		}
 	}
@@ -115,4 +120,39 @@ func (c *ICalendar) GroupByCourse() []Course {
 		res = append(res, *course)
 	}
 	return res
+}
+
+func (c CampusOnline) LoadCourseContacts(courses []Course) ([]Course, error) {
+	for i := range courses {
+		url := baseURL + fmt.Sprintf(courseExportDN, c.token, courses[i].CourseID)
+		got, err := http.Get(url)
+		if err != nil {
+			return nil, err
+		}
+		body, err := ioutil.ReadAll(got.Body)
+		if err != nil {
+			return nil, err
+		}
+		var res CDM
+		err = xml.Unmarshal(body, &res)
+		if err != nil {
+			return nil, err
+		}
+		for _, person := range res.Course.Contacts.Person {
+			pRole := ""
+			for _, r := range person.Role {
+				if pRole != "" {
+					pRole += ", "
+				}
+				pRole += r.Text
+			}
+			courses[i].Contacts = append(courses[i].Contacts, ContactPerson{
+				FirstName: person.Name.Given,
+				LastName:  person.Name.Family,
+				Email:     person.ContactData.Email,
+				Role:      pRole,
+			})
+		}
+	}
+	return courses, nil
 }

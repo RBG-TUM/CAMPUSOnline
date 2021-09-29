@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"net/url"
 	"regexp"
-	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -52,104 +51,12 @@ type Course struct {
 }
 
 type Event struct {
-	Title  string    `json:"title"`
-	RoomID int       `json:"room_id"`
-	Start  time.Time `json:"start"`
-	End    time.Time `json:"end"`
-	RoomName string          `json:"room_name"`
-}
-
-func (c *CampusOnline) GetScheduleForRoom(roomID int, semester string) (*Room, error) {
-	query := baseURL + fmt.Sprintf(roomDN, c.token, roomID, time.Now().Format("20060102"), time.Now().Add(time.Hour*24*7*30*5).Format("20060102"))
-	var httpRes []byte
-	cacheKey := fmt.Sprintf("%s%d", "roomschedule", roomID)
-	if cached, found := c.cache.Get(cacheKey); found {
-		httpRes = cached.([]byte)
-	} else {
-		res, err := http.Get(query)
-		if err != nil {
-			return nil, err
-		}
-		resBody, err := ioutil.ReadAll(res.Body)
-		if err != nil {
-			return nil, err
-		}
-		c.cache.SetWithTTL(cacheKey, resBody, 1, time.Minute)
-		httpRes = resBody
-	}
-	var res RDM
-	err := xml.Unmarshal(httpRes, &res)
-	if err != nil {
-		log.Print(err)
-		return nil, err
-	}
-	filtered := filterAttrRDM(res, "eventTypeID", "LV")      // only lehrveranstaltungen
-	filtered2 := filterAttrRDM(filtered, "courseType", "VO") // only vorlesungen
-	filtered3 := filterAttrRDM(filtered2, "status", "fix")   // nothing deleted or moved
-	grouped := groupEventsByName(filtered3.Resource.Content.ResourceGroup.Content.Events)
-	roomResult := Room{}
-	for courseName, events := range grouped {
-		sort.Slice(events, func(i, j int) bool {
-			start1, _ := getResourceAttrVal(events[i], "dtstart")
-			parsedTime1, err := time.Parse("20060102T150405", start1)
-			if err != nil {
-				return false
-			}
-			start2, _ := getResourceAttrVal(events[j], "dtstart")
-			parsedTime2, err := time.Parse("20060102T150405", start2)
-			if err != nil {
-				return false
-			}
-			return parsedTime1.Before(parsedTime2)
-		})
-		course := Course{Title: courseName}
-		courseID, contacts, err := c.GetCourseIdAndContacts(courseName, semester)
-		if err != nil {
-			log.Println(err)
-		} else {
-			course.CourseID = courseID
-			course.Contacts = contacts
-		}
-
-		for _, event := range events {
-			startStr, found := getResourceAttrVal(event, "dtstart")
-			if !found {
-				continue
-			}
-			start, err := time.Parse("20060102T150405", startStr)
-			if err != nil {
-				continue
-			}
-			endStr, found := getResourceAttrVal(event, "dtend")
-			if !found {
-				continue
-			}
-			end, err := time.Parse("20060102T150405", endStr)
-			if err != nil {
-				continue
-			}
-			course.Events = append(course.Events, Event{
-				Title:  "",
-				Start:  start,
-				End:    end,
-				RoomID: roomID,
-			})
-		}
-		roomResult.Courses = append(roomResult.Courses, course)
-	}
-	return &roomResult, nil
-}
-
-func groupEventsByName(events []CalendarEvent) map[string][]CalendarEvent {
-	res := make(map[string][]CalendarEvent)
-	for _, event := range events {
-		title, found := getResourceAttrVal(event, "eventTitle")
-		if !found {
-			continue
-		}
-		res[title] = append(res[title], event)
-	}
-	return res
+	Title    string    `json:"title"`
+	RoomID   int       `json:"room_id"`
+	Start    time.Time `json:"start"`
+	End      time.Time `json:"end"`
+	RoomName string    `json:"room_name"`
+	Comment  string    `json:"comment"`
 }
 
 func (c *CampusOnline) GetCourseIdAndContacts(courseName string, semester string) (courseID int, contacts []ContactPerson, err error) {
