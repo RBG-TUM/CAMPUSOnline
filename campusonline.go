@@ -48,6 +48,7 @@ type Course struct {
 	CourseID int             `json:"course_id"`
 	Events   []Event         `json:"events"`
 	Contacts []ContactPerson `json:"contacts"`
+	Import   bool            `json:"import"`
 }
 
 type Event struct {
@@ -57,6 +58,7 @@ type Event struct {
 	End      time.Time `json:"end"`
 	RoomName string    `json:"room_name"`
 	Comment  string    `json:"comment"`
+	Import   bool      `json:"import"`
 }
 
 func (c *CampusOnline) GetCourseIdAndContacts(courseName string, semester string) (courseID int, contacts []ContactPerson, err error) {

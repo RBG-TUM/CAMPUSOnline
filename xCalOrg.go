@@ -110,11 +110,13 @@ func (c *ICalendar) GroupByCourse() []Course {
 			courses[splitUrl[1]] = &Course{
 				Title:    event.Summary,
 				CourseID: cID,
+				Import:   true,
 				Events: []Event{{
 					Start:    start,
 					End:      end,
 					RoomName: event.Location.Text,
 					Comment:  event.Comment,
+					Import:   true,
 				}},
 				Contacts: nil,
 			}
@@ -125,6 +127,7 @@ func (c *ICalendar) GroupByCourse() []Course {
 				End:      end,
 				RoomName: event.Location.Text,
 				Comment:  event.Comment,
+				Import:   true,
 			})
 		}
 	}
