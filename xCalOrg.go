@@ -180,7 +180,9 @@ func (c CampusOnline) LoadCourseContacts(courses []Course) ([]Course, error) {
 		if err != nil {
 			return nil, err
 		}
+		hasMainContact := false
 		for _, person := range res.Course.Contacts.Person {
+			isMainContact := false
 			pRole := ""
 			for _, r := range person.Role {
 				if pRole != "" {
@@ -188,12 +190,20 @@ func (c CampusOnline) LoadCourseContacts(courses []Course) ([]Course, error) {
 				}
 				pRole += r.Text
 			}
+			if !hasMainContact && (strings.Contains(strings.ToLower(pRole), "leiter") || strings.Contains(strings.ToLower(pRole), "prüfer")) {
+				isMainContact = true
+				hasMainContact = true
+			}
 			courses[i].Contacts = append(courses[i].Contacts, ContactPerson{
-				FirstName: person.Name.Given,
-				LastName:  person.Name.Family,
-				Email:     person.ContactData.Email,
-				Role:      pRole,
+				FirstName:   person.Name.Given,
+				LastName:    person.Name.Family,
+				Email:       person.ContactData.Email,
+				Role:        pRole,
+				MainContact: isMainContact,
 			})
+		}
+		if !hasMainContact && len(courses[i].Contacts) != 0 {
+			courses[i].Contacts[0].MainContact = true
 		}
 	}
 	return courses, nil

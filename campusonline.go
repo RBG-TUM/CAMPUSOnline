@@ -2,16 +2,10 @@ package campusonline
 
 import (
 	"encoding/xml"
-	"errors"
 	"fmt"
 	"github.com/dgraph-io/ristretto"
 	"io/ioutil"
-	"log"
 	"net/http"
-	"net/url"
-	"regexp"
-	"strconv"
-	"strings"
 	"time"
 )
 
@@ -62,64 +56,6 @@ type Event struct {
 	Import   bool      `json:"import"`
 }
 
-func (c *CampusOnline) GetCourseIdAndContacts(courseName string, semester string) (courseID int, contacts []ContactPerson, err error) {
-	//Get courseID through course search:
-	re, err := regexp.Compile("(\\(.*\\))|(\\[.*])") // Einführung in die Informatik 1 [IN0001] -> Einführung in die Informatik 1
-	if err != nil {
-		return 0, contacts, err
-	}
-	courseNameOrig := courseName // save original course name for later verification
-	courseName = string(re.ReplaceAll([]byte(courseName), []byte("")))
-	courseName = strings.TrimSpace(courseName)
-	searchUrl := basicBaseURL + fmt.Sprintf(courseSearchDN, c.basicToken, url.PathEscape(courseName), semester)
-	log.Println(searchUrl)
-	httpResponse, err := http.Get(searchUrl)
-	if err != nil {
-		return 0, contacts, err
-	}
-	respBody, err := ioutil.ReadAll(httpResponse.Body)
-	if err != nil {
-		return 0, contacts, err
-	}
-	var response Rowset
-	err = xml.Unmarshal(respBody, &response)
-	if err != nil {
-		log.Println(err)
-		return 0, contacts, err
-	}
-	for _, s := range response.Row {
-		if (s.StpLvArtKurz == "PR" || s.StpLvArtKurz == "VO" || s.StpLvArtKurz == "VI") && s.VortragendeMitwirkende.Text != "" { // only Lecture that contains persons
-			courseID, err := strconv.Atoi(s.StpSpNr)
-			if err != nil {
-				return 0, contacts, err
-			}
-			course, err := c.exportCourseByID(courseID)
-			if err != nil {
-				log.Println(err)
-				continue
-			}
-			if course.Course.CourseName.Text != courseNameOrig {
-				continue
-			}
-
-			//Get course contacts via courseID
-			var c []ContactPerson
-			for _, person := range course.Course.Contacts.Person {
-				r := ""
-				for _, role := range person.Role {
-					if r != "" {
-						r += ", "
-					}
-					r += role.Text
-				}
-				c = append(c, ContactPerson{FirstName: person.Name.Given, LastName: person.Name.Family, Email: person.ContactData.Email, Role: r})
-			}
-			return courseID, c, nil
-		}
-	}
-	return 0, contacts, errors.New("can't find courseID for course")
-}
-
 func (c *CampusOnline) exportCourseByID(id int) (CDM, error) {
 	url := baseURL + fmt.Sprintf(courseExportDN, c.token, id)
 	response, err := http.Get(url)
@@ -139,8 +75,9 @@ func (c *CampusOnline) exportCourseByID(id int) (CDM, error) {
 }
 
 type ContactPerson struct {
-	FirstName string
-	LastName  string
-	Email     string
-	Role      string
+	FirstName   string `json:"first_name"`
+	LastName    string `json:"last_name"`
+	Email       string `json:"email"`
+	Role        string `json:"role"`
+	MainContact bool   `json:"main_contact"`
 }
