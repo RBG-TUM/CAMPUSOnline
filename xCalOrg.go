@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -40,31 +41,43 @@ func (c *ICalendar) Sort() {
 
 func (c *ICalendar) Filter() {
 	var newEvents []VEvent
+	re, _ := regexp.Compile("^[0-9]+")
 	for _, event := range c.Vcalendar.Events {
-		if event.Categories.Item == "Vorlesung" &&
-			(event.Status == "fix" || event.Status == "geplant" )&&
+		if strings.Contains(strings.ToLower(event.Categories.Item), "vorlesung") &&
+			(event.Status == "fix" || event.Status == "geplant") &&
 			inRoomList(event.Location.Text) &&
 			!strings.Contains(strings.ToLower(event.Comment), "videoübertragung aus") {
+			// remove prepending digits
+			event.Summary = strings.TrimSpace(re.ReplaceAllString(event.Summary, ""))
+
+			// Replace with readable locations
+			newLocation := event.Location.Text
+			for k, e := range roomList {
+				if strings.Contains(newLocation, k) {
+					event.Location.Text = e
+					break
+				}
+			}
 			newEvents = append(newEvents, event)
 		}
 	}
 	c.Vcalendar.Events = newEvents
 }
 
-var roomList = []string{
-	"5602.EG.001",  // HS1
-	"5604.EG.011",  // HS2
-	"5606.EG.011",  // HS3
-	"5608.EG.038",  // 00.08.038 seminar room
-	"5613.EG.009A", // 00.13.009A seminar room
-	"5620.01.101",  // Interims I 101
-	"5620.01.102",  // Interims I 102
-	"5510.02.001",  // MW 2001 (Rudolf-Diesel-HS)
-	"5510.EG.001",  // MW 0001 (Gustav-Niemann-HS)
+var roomList = map[string]string{
+	"5602.EG.001":  "MI HS1",
+	"5604.EG.011":  "MI HS2",
+	"5606.EG.011":  "MI HS3",
+	"5608.EG.038":  "00.08.038",
+	"5613.EG.009A": "00.13.009A",
+	"5620.01.101":  "Interims I 101",
+	"5620.01.102":  "Interims I 102",
+	"5510.02.001":  "MW 2001",
+	"5510.EG.001":  "MW 0001",
 }
 
 func inRoomList(roomText string) bool {
-	for _, s := range roomList {
+	for s := range roomList {
 		if strings.Contains(roomText, s) {
 			return true
 		}
