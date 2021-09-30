@@ -45,6 +45,7 @@ type Room struct {
 
 type Course struct {
 	Title    string          `json:"title"`
+	Slug     string          `json:"slug"`
 	CourseID int             `json:"course_id"`
 	Events   []Event         `json:"events"`
 	Contacts []ContactPerson `json:"contacts"`

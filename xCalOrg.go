@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
 )
 
 const InOrgId = 14189
@@ -86,6 +87,7 @@ func inRoomList(roomText string) bool {
 }
 
 func (c *ICalendar) GroupByCourse() []Course {
+	slugCount := map[string]int{} // keep track of slug dupes
 	courses := map[string]*Course{}
 	for _, event := range c.Vcalendar.Events {
 		TOUrl := event.Description.Altrep
@@ -107,8 +109,21 @@ func (c *ICalendar) GroupByCourse() []Course {
 			if err != nil {
 				continue
 			}
+
+			// take care of slug dupes
+			slug := generateCourseSlug(event.Summary)
+			count, found := slugCount[slug]
+			if found {
+				slugCount[slug]++
+				slug += fmt.Sprintf("%d", count)
+			} else {
+				slugCount[slug] = 1
+			}
+
+			// create course with event
 			courses[splitUrl[1]] = &Course{
 				Title:    event.Summary,
+				Slug:     slug,
 				CourseID: cID,
 				Import:   true,
 				Events: []Event{{
@@ -136,6 +151,17 @@ func (c *ICalendar) GroupByCourse() []Course {
 		res = append(res, *course)
 	}
 	return res
+}
+
+func generateCourseSlug(title string) string {
+	courseSlug := ""
+	for _, l := range strings.Split(title, " ") {
+		runes := []rune(l)
+		if len(runes) != 0 && (unicode.IsNumber(runes[0]) || unicode.IsLetter(runes[0])) {
+			courseSlug += string(runes[0])
+		}
+	}
+	return courseSlug
 }
 
 func (c CampusOnline) LoadCourseContacts(courses []Course) ([]Course, error) {
