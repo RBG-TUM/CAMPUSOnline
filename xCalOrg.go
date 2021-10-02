@@ -44,6 +44,10 @@ func (c *ICalendar) Filter() {
 	var newEvents []VEvent
 	re, _ := regexp.Compile("^[0-9]+")
 	for _, event := range c.Vcalendar.Events {
+		if strings.Contains(event.Summary, "Praktikum Systemadministration") {
+			event.Categories.Item = "Vorlesung"
+			event.Location.Text = "5620.01.102 (102, Hörsaal 2, \"Interims I\"), Boltzmannstr. 5(5620), 85748 Garching b. München"
+		}
 		if strings.Contains(strings.ToLower(event.Categories.Item), "vorlesung") &&
 			(event.Status == "fix" || event.Status == "geplant") &&
 			inRoomList(event.Location.Text) &&
@@ -125,7 +129,7 @@ func (c *ICalendar) GroupByCourse() []Course {
 				Title:    event.Summary,
 				Slug:     slug,
 				CourseID: cID,
-				Import:   true,
+				Import:   false,
 				Events: []Event{{
 					Start:    start,
 					End:      end,
