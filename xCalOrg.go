@@ -100,11 +100,11 @@ func (c *ICalendar) GroupByCourse() []Course {
 			continue
 		}
 		foundCourse, found := courses[splitUrl[1]]
-		start, parseErr := time.Parse("20060102T150405", event.Dtstart)
+		start, parseErr := time.ParseInLocation("20060102T150405", event.Dtstart, time.Local)
 		if parseErr != nil {
 			continue
 		}
-		end, parseErr := time.Parse("20060102T150405", event.Dtend)
+		end, parseErr := time.ParseInLocation("20060102T150405", event.Dtend, time.Local)
 		if parseErr != nil {
 			continue
 		}
