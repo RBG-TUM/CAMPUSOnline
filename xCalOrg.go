@@ -14,11 +14,12 @@ import (
 )
 
 const InOrgId = 14189
+const MaOrgID = 14178
 const xCalOrgDN = "xcal/organization/courses/xml?token=%s&timeMode=absolute&orgUnitID=%d&fromDate=%s&untilDate=%s"
 
 //GetXCalOrgIN returns all events in the specified time stamp for the computer science organisation
 func (c *CampusOnline) GetXCalOrgIN(from time.Time, until time.Time) (ICalendar, error) {
-	url := baseURL + fmt.Sprintf(xCalOrgDN, c.token, InOrgId, from.Format("20060102"), until.Format("20060102"))
+	url := baseURL + fmt.Sprintf(xCalOrgDN, c.token, MaOrgID, from.Format("20060102"), until.Format("20060102"))
 	println(url)
 	resp, err := http.Get(url)
 	if err != nil {
