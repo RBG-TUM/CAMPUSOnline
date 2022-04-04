@@ -9,11 +9,13 @@ import (
 	"time"
 )
 
-const baseURL = "https://campus.tum.de/tumonlinej/ws/webservice_v1.0/"
-const basicBaseURL = "https://campus.tum.de/tumonline/wbservicesbasic."
-const roomDN = "/rdm/room/schedule/xml?token=%s&timeMode=absolute&roomID=%d&buildingCode=&fromDate=%s&untilDate=%s"
-const courseSearchDN = "veranstaltungenSuche?pToken=%s&pSuche=%s&pSemester=%s"
-const courseExportDN = "/cdm/course/xml?token=%s&courseID=%d"
+const (
+	baseURL        = "https://campus.tum.de/tumonlinej/ws/webservice_v1.0/"
+	basicBaseURL   = "https://campus.tum.de/tumonline/wbservicesbasic."
+	roomDN         = "/rdm/room/schedule/xml?token=%s&timeMode=absolute&roomID=%d&buildingCode=&fromDate=%s&untilDate=%s"
+	courseSearchDN = "veranstaltungenSuche?pToken=%s&pSuche=%s&pSemester=%s"
+	courseExportDN = "/cdm/course/xml?token=%s&courseID=%d"
+)
 
 type CampusOnline struct {
 	token      string

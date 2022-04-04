@@ -18,9 +18,9 @@ const MaOrgID = 14178
 const PhOrgID = 14179
 const xCalOrgDN = "xcal/organization/courses/xml?token=%s&timeMode=absolute&orgUnitID=%d&fromDate=%s&untilDate=%s"
 
-//GetXCalOrgIN returns all events in the specified time stamp for the computer science organisation
-func (c *CampusOnline) GetXCalOrgIN(from time.Time, until time.Time) (ICalendar, error) {
-	url := baseURL + fmt.Sprintf(xCalOrgDN, c.token, PhOrgID, from.Format("20060102"), until.Format("20060102"))
+//GetXCalOrg returns all events in the specified time stamp for the specified organisation
+func (c *CampusOnline) GetXCalOrg(from time.Time, until time.Time, orgID int) (ICalendar, error) {
+	url := baseURL + fmt.Sprintf(xCalOrgDN, c.token, orgID, from.Format("20060102"), until.Format("20060102"))
 	println(url)
 	resp, err := http.Get(url)
 	if err != nil {
@@ -81,6 +81,7 @@ var roomList = map[string]string{
 	"5620.01.102":  "Interims I 102",
 	"5510.02.001":  "MW 2001",
 	"5510.EG.001":  "MW 0001",
+	"5607.EG.014":  "00.07.014",
 }
 
 func inRoomList(roomText string) bool {
