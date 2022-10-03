@@ -13,14 +13,20 @@ import (
 	"unicode"
 )
 
-const InOrgId = 53598
-const MaOrgID = 53597
-const PhOrgID = 53217
+const CsOrgId = 53598 // Computer Science
+const CeOrgId = 53599 // Computer Engineering
+const MaOrgID = 53597 // Mathematics
+const PhOrgID = 53217 // Physics
 const xCalOrgDN = "xcal/organization/courses/xml?token=%s&timeMode=absolute&orgUnitID=%d&fromDate=%s&untilDate=%s"
 
-// GetXCalIn returns all events in the specified time stamp for the cs organization
-func (c *CampusOnline) GetXCalIn(from time.Time, until time.Time) (ICalendar, error) {
-	return c.getXCalOrg(from, until, InOrgId)
+// GetXCalCs returns all events in the specified time stamp for the cs organization
+func (c *CampusOnline) GetXCalCs(from time.Time, until time.Time) (ICalendar, error) {
+	return c.getXCalOrg(from, until, CsOrgId)
+}
+
+// GetXCalCe returns all events in the specified time stamp for the ce organization
+func (c *CampusOnline) GetXCalCe(from time.Time, until time.Time) (ICalendar, error) {
+	return c.getXCalOrg(from, until, CeOrgId)
 }
 
 // GetXCalMa returns all events in the specified time stamp for the Mathematics organization
