@@ -112,7 +112,7 @@ func (c *ICalendar) GroupByCourse() []Course {
 	courses := map[string]*Course{}
 	for _, event := range c.Vcalendar.Events {
 		TOUrl := event.Description.Altrep
-		splitUrl := strings.Split(TOUrl, "pStpSpNr=")
+		splitUrl := strings.Split(TOUrl, "course/")
 		if len(splitUrl) != 2 {
 			continue
 		}
