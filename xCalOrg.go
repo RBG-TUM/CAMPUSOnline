@@ -21,25 +21,25 @@ const xCalOrgDN = "xcal/organization/courses/xml?token=%s&timeMode=absolute&orgU
 
 // GetXCalCs returns all events in the specified time stamp for the cs organization
 func (c *CampusOnline) GetXCalCs(from time.Time, until time.Time) (ICalendar, error) {
-	return c.getXCalOrg(from, until, CsOrgId)
+	return c.GetXCalOrg(from, until, CsOrgId)
 }
 
 // GetXCalCe returns all events in the specified time stamp for the ce organization
 func (c *CampusOnline) GetXCalCe(from time.Time, until time.Time) (ICalendar, error) {
-	return c.getXCalOrg(from, until, CeOrgId)
+	return c.GetXCalOrg(from, until, CeOrgId)
 }
 
 // GetXCalMa returns all events in the specified time stamp for the Mathematics organization
 func (c *CampusOnline) GetXCalMa(from time.Time, until time.Time) (ICalendar, error) {
-	return c.getXCalOrg(from, until, MaOrgID)
+	return c.GetXCalOrg(from, until, MaOrgID)
 }
 
 // GetXCalPh returns all events in the specified time stamp for the physics organization
 func (c *CampusOnline) GetXCalPh(from time.Time, until time.Time) (ICalendar, error) {
-	return c.getXCalOrg(from, until, PhOrgID)
+	return c.GetXCalOrg(from, until, PhOrgID)
 }
 
-func (c *CampusOnline) getXCalOrg(from time.Time, until time.Time, orgID int) (ICalendar, error) {
+func (c *CampusOnline) GetXCalOrg(from time.Time, until time.Time, orgID int) (ICalendar, error) {
 	url := baseURL + fmt.Sprintf(xCalOrgDN, c.token, orgID, from.Format("20060102"), until.Format("20060102"))
 	println(url)
 	resp, err := http.Get(url)
