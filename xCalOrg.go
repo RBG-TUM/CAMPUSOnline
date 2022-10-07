@@ -163,6 +163,11 @@ func (c *ICalendar) GroupByCourse() []Course {
 				Contacts: nil,
 			}
 		} else {
+			uidArr := strings.Split(event.Uid, "@")
+			uid := ""
+			if len(uidArr) > 0 {
+				uid = uidArr[0]
+			}
 			foundCourse.Events = append(foundCourse.Events, Event{
 				Title:    "",
 				Start:    start,
@@ -170,6 +175,7 @@ func (c *ICalendar) GroupByCourse() []Course {
 				RoomName: event.Location.Text,
 				Comment:  event.Comment,
 				Import:   true,
+				EventID:  uid,
 			})
 		}
 	}

@@ -56,6 +56,7 @@ type Event struct {
 	RoomName string    `json:"room_name"`
 	Comment  string    `json:"comment"`
 	Import   bool      `json:"import"`
+	EventID  string    `json:"event_id"`
 }
 
 func (c *CampusOnline) exportCourseByID(id int) (CDM, error) {
