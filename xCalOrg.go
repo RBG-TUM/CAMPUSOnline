@@ -95,6 +95,7 @@ var roomList = map[string]string{
 	"5602.EG.001":  "MI HS1",
 	"5604.EG.011":  "MI HS2",
 	"5606.EG.011":  "MI HS3",
+	"8120.01.101":  "Audimax im Galileo",
 	"5608.EG.038":  "00.08.038",
 	"5613.EG.009A": "00.13.009A",
 	"5620.01.101":  "Interims I 101",
