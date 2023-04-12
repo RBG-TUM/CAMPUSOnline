@@ -67,11 +67,9 @@ func (c *ICalendar) Filter() {
 	re, _ := regexp.Compile("^[0-9]+")
 	for _, event := range c.Vcalendar.Events {
 		if strings.Contains(event.Summary, "Praktikum Systemadministration") {
-			event.Categories.Item = "Vorlesung"
 			event.Location.Text = "5620.01.102 (102, Hörsaal 2, \"Interims I\"), Boltzmannstr. 5(5620), 85748 Garching b. München"
 		}
-		if strings.Contains(strings.ToLower(event.Categories.Item), "vorlesung") &&
-			(event.Status == "fix" || event.Status == "geplant") &&
+		if (event.Status == "fix" || event.Status == "geplant") &&
 			inRoomList(event.Location.Text) &&
 			!strings.Contains(strings.ToLower(event.Comment), "videoübertragung aus") {
 			// remove prepending digits
