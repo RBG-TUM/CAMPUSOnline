@@ -3,6 +3,7 @@ package campusonline
 import (
 	"encoding/xml"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"regexp"
@@ -196,14 +197,15 @@ func generateCourseSlug(title string) string {
 	return courseSlug
 }
 
-func (c CampusOnline) LoadCourseContacts(courses []Course) ([]Course, error) {
+// EnrichCourse adds information about course contacts and language to the courses
+func (c *CampusOnline) EnrichCourse(courses []Course) ([]Course, error) {
 	for i := range courses {
 		url := baseURL + fmt.Sprintf(courseExportDN, c.token, courses[i].CourseID)
 		got, err := http.Get(url)
 		if err != nil {
 			return nil, err
 		}
-		body, err := ioutil.ReadAll(got.Body)
+		body, err := io.ReadAll(got.Body)
 		if err != nil {
 			return nil, err
 		}
@@ -212,6 +214,14 @@ func (c CampusOnline) LoadCourseContacts(courses []Course) ([]Course, error) {
 		if err != nil {
 			return nil, err
 		}
+
+		switch strings.ToLower(res.Course.InstructionLanguage.TeachingLang) {
+		case "englisch", "english", "en":
+			courses[i].Language = "en"
+		case "deutsch", "german", "de":
+			courses[i].Language = "de"
+		}
+
 		hasMainContact := false
 		for _, person := range res.Course.Contacts.Person {
 			isMainContact := false

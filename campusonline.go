@@ -3,10 +3,11 @@ package campusonline
 import (
 	"encoding/xml"
 	"fmt"
-	"github.com/dgraph-io/ristretto"
 	"io/ioutil"
 	"net/http"
 	"time"
+
+	"github.com/dgraph-io/ristretto"
 )
 
 const (
@@ -46,6 +47,7 @@ type Course struct {
 	Events   []Event         `json:"events"`
 	Contacts []ContactPerson `json:"contacts"`
 	Import   bool            `json:"import"`
+	Language string          `json:"language"`
 }
 
 type Event struct {
