@@ -103,6 +103,7 @@ var roomList = map[string]string{
 	"5510.EG.001":  "MW 0001",
 	"5607.EG.014":  "00.07.014",
 	"8120.EG.001":  "Hörsaal im Galileo",
+	"5609.EG.022":  "00.09.022",
 }
 
 func inRoomList(roomText string) bool {
