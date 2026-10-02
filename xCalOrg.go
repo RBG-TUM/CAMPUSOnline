@@ -234,7 +234,7 @@ func (c *CampusOnline) EnrichCourse(courses []Course) ([]Course, error) {
 				}
 				pRole += r.Text
 			}
-			if !hasMainContact && (strings.Contains(strings.ToLower(pRole), "leiter") || strings.Contains(strings.ToLower(pRole), "prüfer")) {
+			if strings.Contains(strings.ToLower(pRole), "leiter") || strings.Contains(strings.ToLower(pRole), "prüfer") {
 				isMainContact = true
 				hasMainContact = true
 			}
@@ -246,8 +246,10 @@ func (c *CampusOnline) EnrichCourse(courses []Course) ([]Course, error) {
 				MainContact: isMainContact,
 			})
 		}
-		if !hasMainContact && len(courses[i].Contacts) != 0 {
-			courses[i].Contacts[0].MainContact = true
+		if !hasMainContact {
+			for j := range courses[i].Contacts {
+				courses[i].Contacts[j].MainContact = true
+			}
 		}
 	}
 	return courses, nil
